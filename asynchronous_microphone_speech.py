@@ -8,7 +8,7 @@ from google.cloud.speech import types
 import pyaudio
 from six.moves import queue
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:/Users/Martin/Git/keys/speech2text-1597656821253-be85a49eb749.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./keys/speech2text-1597656821253-4168b13db8f6.json"
 
 # Audio recording parameters
 RATE = 16000
