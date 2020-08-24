@@ -5,7 +5,9 @@ class FLAGS:
     chunk_size = int(sample_rate / 10)  # 100ms
 
     # authentication settings
-    google_cloud_auth_key = "./keys/speech2text-1597656821253-be85a49eb749.json"
+    # google_cloud_auth_key = "./keys/speech2text-1597656821253-be85a49eb749.json"  # notebook
+    google_cloud_auth_key = "./keys/speech2text-1597656821253-4168b13db8f6.json"  # desktop
+
 
     # keyword spotting settings
     device_map = {r"\bkonvic": "kettle",
@@ -20,3 +22,8 @@ class FLAGS:
     for commands in command_map.values():
         for k in commands.keys():
             keywords.append(k)
+
+    # wiz light ip adresses
+    lights = {0: "192.168.1.202",
+              1: "192.168.1.243",
+              2: "192.168.1.249"}
