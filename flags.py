@@ -1,4 +1,7 @@
 class FLAGS:
+    # switch between online and offline mode
+    offline = True
+
     # manual audio settings
     streaming_limit = 240000  # 4 minutes
     sample_rate = 16000  # Hz
@@ -12,18 +15,31 @@ class FLAGS:
     # keyword spotting settings
     device_map = {r"\bkonvic": "kettle",
                   r"\bsvětl": "light"}
+    location_map = {r"\bložnic": "bedroom",
+                    r"\bobýv": "livingroom",
+                    r"\bkuchy[nň]": "kitchen",
+                    r"\b(všechn|všud)": "everyroom"}
     command_map = {"kettle": {r"\bpřevař": "boil", r'\b\d{1,3}\b': "_val"},
-                   "light": {r"\b(zapn|rozsv)": "on", r"\b(vypn|zavř|zhasn)": "off"}}
+                   "light": {r"\b(zapn|rozsv)": "turnon",
+                             r"\b(vypn|zavř|zhasn)": "turnoff",
+                             r"\b(barv|rgb)": "rgb",
+                             r"\bteplot": "colortemp",
+                             r"\b(jas|intenzit|svítiv)": "brightness",
+                             r'\b\d{1,3}\b': "_val",
+                             r'\b\d{4}\b': "_val"}}
 
     # automatic inference
     keywords = []
-    for k in device_map.keys():
-        keywords.append(k)
+    for device in device_map.keys():
+        keywords.append(device)
+    for location in location_map.keys():
+        keywords.append(location)
     for commands in command_map.values():
         for k in commands.keys():
             keywords.append(k)
+    keywords = set(keywords)
 
     # wiz light ip adresses
-    lights = {0: "192.168.1.202",
-              1: "192.168.1.243",
-              2: "192.168.1.249"}
+    lights = {"kitchen": "192.168.1.202",
+              "bedroom": "192.168.1.243",
+              "livingroom": "192.168.1.249"}

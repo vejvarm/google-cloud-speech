@@ -1,3 +1,4 @@
+import asyncio
 import os
 import re
 import sys
@@ -7,6 +8,7 @@ from google.cloud import speech
 from flags import FLAGS
 from helpers import get_current_time, kw_spotter, kw_decoder
 from Microphone import ResumableMicrophoneStream
+from WizLights import WizLight, light_commands
 
 # Audio recording parameters
 STREAMING_LIMIT = FLAGS.streaming_limit
@@ -23,7 +25,7 @@ LIGHT_GREEN = "\033[1;32m"
 YELLOW = '\033[0;33m'
 
 
-def listen_print_loop(responses, stream):
+def listen_print_loop(responses, stream, lights=None):
     """Iterates through server responses and prints them.
     The responses passed is a generator that will block until a response
     is provided by the server.
@@ -80,19 +82,24 @@ def listen_print_loop(responses, stream):
 
             # Exit recognition if any of the transcribed phrases could be
             # one of our keywords.
-            if re.search(r'\b(exit|quit)\b', transcript, re.I):
+            if re.search(r'\b(exit|ukončit)\b', transcript, re.I):
                 sys.stdout.write(YELLOW)
-                sys.stdout.write('Exiting...\n')
+                sys.stdout.write('Ukončuji...\n')
                 stream.closed = True
                 break
 
             # Keyword spotting
             matches = kw_spotter([transcript], FLAGS.keywords)
-            commands = kw_decoder(matches, FLAGS.device_map, FLAGS.command_map)
-            if commands:
+            kw_decoded = kw_decoder(matches, FLAGS.device_map, FLAGS.location_map, FLAGS.command_map)
+            if kw_decoded:
+                device, locations, command = kw_decoded[0]
                 sys.stdout.write(LIGHT_GREEN)
-                sys.stdout.write(f"{commands}\n")
-                commands.clear()  # TODO: continue with functionality api instead
+                sys.stdout.write(f"device: {device} locations: {locations} command: {command}\n")
+
+                if lights and "light" in device:
+                    light_commands(lights, locations, command)
+
+            kw_decoded.clear()
 
         else:
             sys.stdout.write(RED)
@@ -117,9 +124,20 @@ def main():
 
     mic_manager = ResumableMicrophoneStream(SAMPLE_RATE, CHUNK_SIZE)
     print(mic_manager.chunk_size)
+
+    sys.stdout.write(GREEN)
+    sys.stdout.write("Vytvářím smyčku.\n")
+    loop = asyncio.get_event_loop()
+    if FLAGS.offline:
+        sys.stdout.write("Zahajuji offline režim.\n")
+        lights = None
+    else:
+        sys.stdout.write("Připojuji se ke světlům.\n")
+        lights = {k: WizLight(v, loop) for k, v in FLAGS.lights.items()}
+
     sys.stdout.write(YELLOW)
-    sys.stdout.write('\nListening, say "Quit" or "Exit" to stop.\n\n')
-    sys.stdout.write('End (ms)       Transcript Results/Status\n')
+    sys.stdout.write('\nPoslouchám, pro ukončení řekněte "Ukončit" nebo "Exit".\n\n')
+    sys.stdout.write('Konec (ms)       Výsledky přepisů/Status\n')
     sys.stdout.write('=====================================================\n')
 
     with mic_manager as stream:
@@ -139,7 +157,7 @@ def main():
                                                    requests)
 
             # Now, put the transcription responses to use.
-            listen_print_loop(responses, stream)
+            listen_print_loop(responses, stream, lights)
 
             if stream.result_end_time > 0:
                 stream.final_request_end_time = stream.is_final_end_time
