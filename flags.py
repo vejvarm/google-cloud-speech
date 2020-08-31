@@ -1,6 +1,6 @@
 class FLAGS:
     # switch between online and offline mode
-    offline = True
+    offline = False
 
     # manual audio settings
     streaming_limit = 240000  # 4 minutes
@@ -14,11 +14,11 @@ class FLAGS:
 
     # keyword spotting settings
     device_map = {r"\bkonvic": "kettle",
-                  r"\bsvětl": "light"}
+                  r"\b(světl|světe)": "light"}
     location_map = {r"\bložnic": "bedroom",
                     r"\bobýv": "livingroom",
                     r"\bkuchy[nň]": "kitchen",
-                    r"\b(všechn|všud)": "everyroom"}
+                    r"\b(všech|všud)": "everyroom"}
     command_map = {"kettle": {r"\bpřevař": "boil", r'\b\d{1,3}\b': "_val"},
                    "light": {r"\b(zapn|rozsv)": "turnon",
                              r"\b(vypn|zavř|zhasn)": "turnoff",

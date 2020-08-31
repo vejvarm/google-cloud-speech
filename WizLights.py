@@ -8,6 +8,8 @@ from helpers import console_logger
 
 LOGGER = console_logger(__name__, "DEBUG")
 
+_SEQUENCE_NOT_FOUND = "Sekvence hodnot nenalezena. Ignoruji příkaz."
+
 
 class WizLight:
 
@@ -60,21 +62,30 @@ def light_commands(lights, locations, command):
         if "rgb" in command:
             sequence = re.findall(r"\brgb\s(\d{0,3}\s*\d{0,3}\s*\d{0,3})", command, flags=re.I)
             LOGGER.debug(f"rgb sequence: {sequence}")
-            colors = [int(s) for s in sequence[0].split(" ")]
-            for i in range(3 - len(colors)):
-                colors.append(0)  # pad to have to 3 values
-            LOGGER.debug(f"colors: {colors}")
-            light.set_color(colors)
+            if sequence:
+                colors = [int(s) for s in sequence[0].split(" ")]
+                for i in range(3 - len(colors)):
+                    colors.append(0)  # pad to have to 3 values
+                LOGGER.debug(f"colors: {colors}")
+                light.set_color(colors)
+            else:
+                print(_SEQUENCE_NOT_FOUND)
         if "brightness" in command:
             sequence = re.findall(r"\bbrightness\s(\b\d{1,3}\b)", command, flags=re.I)
             LOGGER.debug(f"brightness sequence: {sequence}")
-            brightness = int(sequence[0])
-            light.set_brightness(brightness)
+            if sequence:
+                brightness = int(sequence[0])
+                light.set_brightness(brightness)
+            else:
+                print(_SEQUENCE_NOT_FOUND)
         if "colortemp" in command:
             sequence = re.findall(r"\bcolortemp\s(\b\d{4}\b)", command, flags=re.I)
             LOGGER.debug(f"colortemp sequence: {sequence}")
-            colortemp = int(sequence[0])
-            light.set_colortemp(colortemp)
+            if sequence:
+                colortemp = int(sequence[0])
+                light.set_colortemp(colortemp)
+            else:
+                print(_SEQUENCE_NOT_FOUND)
         if "turnon" in command:
             light.set_brightness()
         elif "turnoff" in command:

@@ -147,7 +147,7 @@ def main():
         language_code=language_code)
     streaming_config = types.StreamingRecognitionConfig(
         config=config,
-        interim_results=True)
+        interim_results=False)
 
     with MicrophoneStream(RATE, CHUNK) as stream:
         audio_generator = stream.generator()
