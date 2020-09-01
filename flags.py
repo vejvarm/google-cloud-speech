@@ -1,6 +1,6 @@
 class FLAGS:
     # switch between online and offline mode
-    offline = False
+    online = True
 
     # manual audio settings
     streaming_limit = 240000  # 4 minutes

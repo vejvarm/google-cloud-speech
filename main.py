@@ -24,6 +24,10 @@ GREEN = '\033[0;32m'
 LIGHT_GREEN = "\033[1;32m"
 YELLOW = '\033[0;33m'
 
+if len(sys.argv) > 1:
+    if "offline" in sys.argv[1]:
+        FLAGS.online = False
+
 
 def listen_print_loop(responses, stream, lights=None):
     """Iterates through server responses and prints them.
@@ -128,12 +132,12 @@ def main():
     sys.stdout.write(GREEN)
     sys.stdout.write("Vytvářím smyčku.\n")
     loop = asyncio.get_event_loop()
-    if FLAGS.offline:
-        sys.stdout.write("Zahajuji offline režim.\n")
-        lights = None
-    else:
+    if FLAGS.online:
         sys.stdout.write("Připojuji se ke světlům.\n")
         lights = {k: WizLight(v, loop) for k, v in FLAGS.lights.items()}
+    else:
+        sys.stdout.write("Zahajuji offline režim.\n")
+        lights = None
 
     sys.stdout.write(YELLOW)
     sys.stdout.write('\nPoslouchám, pro ukončení řekněte "Ukončit" nebo "Exit".\n\n')
